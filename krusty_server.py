@@ -9,16 +9,23 @@ conn = sqlite3.connect("movies.sqlite")
 
 #-----------HELP FUNCTIONS----------------
 def url(resource):
-    return f"http://{HOST}:{PORT}{resource}"
+	return "http://{HOST}:{PORT}{resource}"
 
 def format_response(d):
-    return json.dumps(d, indent=4) + "\n"
+	return json.dumps(d, indent=4) + "\n"
 
 def hash(msg):
     import hashlib
     return hashlib.sha256(msg.encode('utf-8')).hexdigest()
 
 #---------------SOLVING THE ASSINGMENTS-----------------------------
+
+@get('/ping')
+def get_ping():
+
+    s = {"pong"}
+    response.status = 200
+    return s
 
 @post('/reset')
 def reset():
@@ -150,3 +157,19 @@ def reset():
     s = {'OK'}
     response.status = 200
     return s
+
+@post('/customers')
+def customers():
+    c = conn.cursor()
+    c.execute(
+        """
+        SELECT name, address
+        FROM   customers
+        """
+    )
+    s = [{"name": name, "address": address}
+         for (name, address) in c]
+    return json.dumps({"data": s}, indent=4)
+
+
+run(host=HOST, port=PORT, reloader=True, debug=True)
