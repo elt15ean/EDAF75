@@ -3,9 +3,9 @@ import sqlite3
 import json
 
 HOST = 'localhost'
-PORT = 7007
+PORT = 8888
 
-conn = sqlite3.connect("movies.sqlite")
+conn = sqlite3.connect("krusty.sqlite")
 
 #-----------HELP FUNCTIONS----------------
 def url(resource):
@@ -82,25 +82,25 @@ def reset():
         """
         INSERT
         INTO   ingredients(ingredient_name, quantity, unit)
-        VALUES ('Flour', 100 000, g),
-               ('Butter', 100 000, g),
-               ('Icing sugar', 100 000, g),
-               ('Roasted', chopped nuts, 100 000, g),
-               ('Fine-ground nuts', 100 000, g),
-               ('Ground, roasted nuts', 100 000, g),
-               ('Bread crumbs', 100 000, g),
-               ('Sugar', 100 000, g),
-               ('Egg whites', 100 000, ml),
-               ('Chocolate', 100 000, g),
-               ('Marzipan', 100 000, g),
-               ('Eggs', 100 000, g),
-               ('Potato starch', 100 000, g),
-               ('Wheat flour', 100 000, g),
-               ('Sodium bicarbonate', 100 000, g),
-               ('Vanilla', 100 000, g),
-               ('Chopped almonds', 100 000, g),
-               ('Cinnamon', 100 000, g),
-               ('Vanilla sugar', 100 000, g)
+        VALUES ('Flour', 100 000, 'g'),
+               ('Butter', 100 000, 'g'),
+               ('Icing sugar', 100 000, 'g'),
+               ('Roasted, chopped nuts', 100 000, 'g'),
+               ('Fine-ground nuts', 100 000, 'g'),
+               ('Ground, roasted nuts', 100 000, 'g'),
+               ('Bread crumbs', 100 000, 'g'),
+               ('Sugar', 100 000, 'g'),
+               ('Egg whites', 100 000, 'ml'),
+               ('Chocolate', 100 000, 'g'),
+               ('Marzipan', 100 000, 'g'),
+               ('Eggs', 100 000, 'g'),
+               ('Potato starch', 100 000, 'g'),
+               ('Wheat flour', 100 000, 'g'),
+               ('Sodium bicarbonate', 100 000, 'g'),
+               ('Vanilla', 100 000, 'g'),
+               ('Chopped almonds', 100 000, 'g'),
+               ('Cinnamon', 100 000, 'g'),
+               ('Vanilla sugar', 100 000, 'g')
         """
     )
     c.execute(
@@ -110,7 +110,7 @@ def reset():
         VALUES ('Nut ring','Flour',450),
                ('Nut ring','Butter',450),
                ('Nut ring','Icing sugar',190),
-               ('Nut ring','Roasted',225),
+               ('Nut ring','Roasted, chopped nuts',225),
                ('Nut cookie','Fine-ground nuts',750),
                ('Nut cookie','Ground, roasted nuts',625),
                ('Nut cookie','Bread crumbs',125),
