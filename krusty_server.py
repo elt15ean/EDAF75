@@ -82,25 +82,25 @@ def reset():
         """
         INSERT
         INTO   ingredients(ingredient_name, quantity, unit)
-        VALUES ('Flour', 100 000, 'g'),
-               ('Butter', 100 000, 'g'),
-               ('Icing sugar', 100 000, 'g'),
-               ('Roasted, chopped nuts', 100 000, 'g'),
-               ('Fine-ground nuts', 100 000, 'g'),
-               ('Ground, roasted nuts', 100 000, 'g'),
-               ('Bread crumbs', 100 000, 'g'),
-               ('Sugar', 100 000, 'g'),
-               ('Egg whites', 100 000, 'ml'),
-               ('Chocolate', 100 000, 'g'),
-               ('Marzipan', 100 000, 'g'),
-               ('Eggs', 100 000, 'g'),
-               ('Potato starch', 100 000, 'g'),
-               ('Wheat flour', 100 000, 'g'),
-               ('Sodium bicarbonate', 100 000, 'g'),
-               ('Vanilla', 100 000, 'g'),
-               ('Chopped almonds', 100 000, 'g'),
-               ('Cinnamon', 100 000, 'g'),
-               ('Vanilla sugar', 100 000, 'g')
+        VALUES ('Flour', 100000, 'g'),
+               ('Butter', 100000, 'g'),
+               ('Icing sugar', 100000, 'g'),
+               ('Roasted, chopped nuts', 100000, 'g'),
+               ('Fine-ground nuts', 100000, 'g'),
+               ('Ground, roasted nuts', 100000, 'g'),
+               ('Bread crumbs', 100000, 'g'),
+               ('Sugar', 100000, 'g'),
+               ('Egg whites', 100000, 'ml'),
+               ('Chocolate', 100000, 'g'),
+               ('Marzipan', 100000, 'g'),
+               ('Eggs', 100000, 'g'),
+               ('Potato starch', 100000, 'g'),
+               ('Wheat flour', 100000, 'g'),
+               ('Sodium bicarbonate', 100000, 'g'),
+               ('Vanilla', 100000, 'g'),
+               ('Chopped almonds', 100000, 'g'),
+               ('Cinnamon', 100000, 'g'),
+               ('Vanilla sugar', 100000, 'g')
         """
     )
     c.execute(
@@ -144,11 +144,14 @@ def reset():
         """
         INSERT
         INTO   customers(customer_name, customer_address)
-        VALUES ('Nut ring'),
-               ('Nut cookie'),
-               ('Amneris'),
-               ('Almond delight'),
-               ('Berliner')
+        VALUES ('Finkakor AB', 'Helsingborg'),
+               ('Smabrod AB', 'Malmo'),
+               ('Kaffebrod AB', 'Landskrona'),
+               ('Bjudkakor AB', 'Ystad'),
+               ('Kalaskakor AB', 'Trelleborg'),
+               ('Partykakor AB', 'Kristianstad'),
+               ('Gastkakor AB', 'Hassleholm'),
+               ('Skanekakor AB', 'Perstorp')
         """
     )
     conn.commit()
@@ -162,13 +165,14 @@ def customers():
     c = conn.cursor()
     c.execute(
         """
-        SELECT name, address
+        SELECT customer_name, customer_address
         FROM   customers
+	ORDER BY customer_name
         """
     )
-    s = [{"name": name, "address": address}
+    s = [{"customer_name": name, "customer_address": address}
          for (name, address) in c]
-    return json.dumps({"data": s}, indent=4)
+    return json.dumps({"customers": s}, indent=4)
 
 @get('/ingredients')
 def ingredients():
@@ -177,11 +181,12 @@ def ingredients():
         """
         SELECT ingredient_name, quantity, unit
         FROM   ingredients
+	ORDER BY ingredient_name
         """
     )
-    s = [{"name": ingredient_name, "quantity": quantity, "unit": unit}
-         for (name, address) in c]
-    return json.dumps({"data": s}, indent=4)
+    s = [{"ingredient_name": ingredient_name, "quantity": quantity, "unit": unit}
+         for (ingredient_name, quantity, unit) in c]
+    return json.dumps({"ingredients": s}, indent=4)
 
 
 run(host=HOST, port=PORT, reloader=True, debug=True)
