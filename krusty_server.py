@@ -59,6 +59,92 @@ def reset():
         DELETE FROM customers
         """
     )
+    c.execute(
+        """
+        INSERT
+        INTO   cookies(cookie_name)
+        VALUES ('Nut ring'),
+               ('Nut cookie'),
+               ('Amneris'),
+               ('Tango'),
+               ('Almond delight'),
+               ('Berliner')
+        """
+    )
+    c.execute(
+        """
+        INSERT
+        INTO   ingredients(ingredient_name, quantity, unit)
+        VALUES ('Flour', 100 000, g),
+               ('Butter', 100 000, g),
+               ('Icing sugar', 100 000, g),
+               ('Roasted', chopped nuts, 100 000, g),
+               ('Fine-ground nuts', 100 000, g),
+               ('Ground, roasted nuts', 100 000, g),
+               ('Bread crumbs', 100 000, g),
+               ('Sugar', 100 000, g),
+               ('Egg whites', 100 000, ml),
+               ('Chocolate', 100 000, g),
+               ('Marzipan', 100 000, g),
+               ('Eggs', 100 000, g),
+               ('Potato starch', 100 000, g),
+               ('Wheat flour', 100 000, g),
+               ('Sodium bicarbonate', 100 000, g),
+               ('Vanilla', 100 000, g),
+               ('Chopped almonds', 100 000, g),
+               ('Cinnamon', 100 000, g),
+               ('Vanilla sugar', 100 000, g)
+        """
+    )
+    c.execute(
+        """
+        INSERT
+        INTO   recipes(cookie_name, ingredient_name, quantity_needed)
+        VALUES ('Nut ring','Flour',450),
+               ('Nut ring','Butter',450),
+               ('Nut ring','Icing sugar',190),
+               ('Nut ring','Roasted',225),
+               ('Nut cookie','Fine-ground nuts',750),
+               ('Nut cookie','Ground, roasted nuts',625),
+               ('Nut cookie','Bread crumbs',125),
+               ('Nut cookie','Sugar',375),
+               ('Nut cookie','Egg whites',350),
+               ('Nut cookie','Chocolate',50),
+               ('Amneris','Marzipan',750),
+               ('Amneris','Butter',250),
+               ('Amneris','Eggs',250),
+               ('Amneris','Potato starch',25),
+               ('Amneris','Wheat flour',25),
+               ('Tango','',),
+               ('Tango','Butter',200),
+               ('Tango','Sugar',250),
+               ('Tango','Flour',300),
+               ('Tango','Sodium bicarbonate',4),
+               ('Tango','Vanilla',2),
+               ('Almond delight','Butter',400),
+               ('Almond delight','Sugar',270),
+               ('Almond delight','Chopped almonds',279),
+               ('Almond delight','Flour',400),
+               ('Almond delight','Cinnamon',10),
+               ('Berliner','Flour',350),
+               ('Berliner','Butter',250),
+               ('Berliner','Icing sugar',100),
+               ('Berliner','Eggs',50),
+               ('Berliner','Vanilla sugar',5),
+               ('Berliner','Chocolate',50)
+        """
+    )
+    c.execute(
+        """
+        INSERT
+        INTO   customers(customer_name, customer_address)
+        VALUES ('Nut ring'),
+               ('Nut cookie'),
+               ('Amneris'),
+               ('Almond delight'),
+               ('Berliner')
+        """
+    )
     conn.commit()
     c.close()
     s = {'OK'}
