@@ -72,7 +72,7 @@ def reset():
     response.status = 200
     return s
 
-@post('/customers')
+@get('/customers')
 def customers():
     c = conn.cursor()
     c.execute(
@@ -82,6 +82,19 @@ def customers():
         """
     )
     s = [{"name": name, "address": address}
+         for (name, address) in c]
+    return json.dumps({"data": s}, indent=4)
+
+@get('/ingredients')
+def ingredients():
+    c = conn.cursor()
+    c.execute(
+        """
+        SELECT ingredient_name, quantity, unit
+        FROM   ingredients
+        """
+    )
+    s = [{"name": ingredient_name, "quantity": quantity, "unit": unit}
          for (name, address) in c]
     return json.dumps({"data": s}, indent=4)
 
