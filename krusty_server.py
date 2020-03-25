@@ -122,7 +122,6 @@ def reset():
                ('Amneris','Eggs',250),
                ('Amneris','Potato starch',25),
                ('Amneris','Wheat flour',25),
-               ('Tango','',),
                ('Tango','Butter',200),
                ('Tango','Sugar',250),
                ('Tango','Flour',300),
