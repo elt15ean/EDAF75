@@ -45,9 +45,9 @@ CREATE TABLE cookies (
 CREATE TABLE pallets (
 	pallet_id TEXT DEFAULT (lower(hex(randomblob(16)))),
 	cookie_name TEXT,
-	blocked BOOLEAN,
-	produced DATE,
-	delivered DATE,
+	blocked BOOLEAN DEFAULT (0),
+	produced DATE DEFAULT (CURRENT_DATE),
+	delivered DATE DEFAULT (NULL),
     
 	PRIMARY KEY (pallet_id),
 	FOREIGN KEY (cookie_name) REFERENCES cookies(cookie_name)

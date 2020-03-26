@@ -5,7 +5,7 @@ import json
 HOST = 'localhost'
 PORT = 8888
 
-conn = sqlite3.connect("krusty.sqlite")
+conn = sqlite3.connect("krustyDB.sqlite")
 
 #-----------HELP FUNCTIONS----------------
 def url(resource):
@@ -154,6 +154,13 @@ def reset():
                ('Skanekakor AB', 'Perstorp')
         """
     )
+    c.execute(
+        """
+        INSERT
+        INTO   pallets(cookie_name)
+        VALUES ('Berliner')
+        """
+    )
     conn.commit()
     c.close()
     s = {'OK'}
@@ -219,25 +226,49 @@ def recipes():
     return json.dumps({"recipes": s}, indent=4)
 
 @get('/pallets')
-def pallets():
+def get_pallets():
     c = conn.cursor()
     c.execute(
         """
-        SELECT pallet_id, cookie_name, produced, customer_name, blocked
+        SELECT pallet_id
         FROM   pallets
-        JOIN cookies
-        USING (cookie_name)
-        JOIN orders
-        USING (cookie_name)
-        JOIN customers
-        USING (customer_name)
-        ORDER BY cookie_name
         """   
     )
-s = [{"cookie": cookie_name, "id": pallet_id,"production_date": produced,"customer_name": customer_name, "blocked": blocked}
-         for (cookie_name, pallet_id, produced, customer_name, blocked) in c]
+    s = [{"cookie": cookie_name, "id": pallet_id,"production_date": produced,"customer_name": customer_name, "blocked": blocked}
+         for (pallet_id,cookie_name, produced, customer_name, blocked) in c]
+    c.close()
     return json.dumps({"pallets": s}, indent=4)
 
+@post('/pallets/<current_cookie>')
+def post_pallets(current_cookie):
+    c = conn.cursor()
+
+
+    cookieList = c.execute(
+    """
+    SELECT cookie_name
+    FROM cookies
+    """
+    ).fetchall()
+    print(type(cookieList))
+
+    if len(cookieList) == 0:
+        s = {"status": "no such cookie"}
+        c.close()
+        response.status = 200
+        return json.dumps({"data": s}, indent=4)
+    else:
+        c.execute(
+        """
+        INSERT
+        INTO pallets (cookie_name)
+        VALUES ('Berliner')
+        """
+        )
+        conn.commit()
+        s = [{"status": "ok", "id":"123"}]
+        c.close()
+        response.status = 200
+        return json.dumps({"data": s}, indent=4)
+
 run(host=HOST, port=PORT, reloader=True, debug=True)
-
-
