@@ -223,8 +223,14 @@ def pallets():
     c = conn.cursor()
     c.execute(
         """
-        SELECT pallet_id
+        SELECT pallet_id, cookie_name, produced, customer_name, blocked
         FROM   pallets
+        JOIN cookies
+        USING (cookie_name)
+        JOIN orders
+        USING (cookie_name)
+        JOIN customers
+        USING (customer_name)
         ORDER BY cookie_name
         """   
     )
