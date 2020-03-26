@@ -218,6 +218,19 @@ def recipes():
          for (cookie_name, ingredient_name, quantity_needed, unit) in c]
     return json.dumps({"recipes": s}, indent=4)
 
+@get('/pallets')
+def pallets():
+    c = conn.cursor()
+    c.execute(
+        """
+        SELECT pallet_id
+        FROM   pallets
+        ORDER BY cookie_name
+        """   
+    )
+s = [{"cookie": cookie_name, "id": pallet_id,"production_date": produced,"customer_name": customer_name, "blocked": blocked}
+         for (cookie_name, pallet_id, produced, customer_name, blocked) in c]
+    return json.dumps({"pallets": s}, indent=4)
 
 run(host=HOST, port=PORT, reloader=True, debug=True)
 
