@@ -188,5 +188,37 @@ def ingredients():
          for (ingredient_name, quantity, unit) in c]
     return json.dumps({"ingredients": s}, indent=4)
 
+@get('/cookies')
+def cookies():
+    c = conn.cursor()
+    c.execute(
+        """
+        SELECT cookie_name
+        FROM   cookies
+	ORDER BY cookie_name
+        """
+    )
+    s = [{"name": cookie_name}
+         for (cookie_name) in c]
+    return json.dumps({"cookies": s}, indent=4)
+
+@get('/recipes')
+def recipes():
+    c = conn.cursor()
+    c.execute(
+        """
+        SELECT cookie_name, ingredient_name, quantity_needed, unit
+        FROM   recipes
+	JOIN ingredients
+	USING (ingredient_name)
+	ORDER BY cookie_name, ingredient_name
+        """
+    )
+    s = [{"cookie": cookie_name, "ingredient": ingredient_name,"quantity": quantity_needed,"unit": unit}
+         for (cookie_name, ingredient_name, quantity_needed, unit) in c]
+    return json.dumps({"recipes": s}, indent=4)
+
 
 run(host=HOST, port=PORT, reloader=True, debug=True)
+
+
