@@ -43,7 +43,7 @@ CREATE TABLE cookies (
 );
 
 CREATE TABLE pallets (
-	pallet_id TEXT,
+	pallet_id TEXT DEFAULT (lower(hex(randomblob(16)))),
 	cookie_name TEXT,
 	blocked BOOLEAN,
 	produced DATE,
@@ -54,7 +54,7 @@ CREATE TABLE pallets (
 );
 
 CREATE TABLE orders (
-	order_id TEXT,
+	order_id TEXT DEFAULT (lower(hex(randomblob(16)))),
 	no_pallets INT,
 	order_status BOOLEAN,
 	ordered DATE,
