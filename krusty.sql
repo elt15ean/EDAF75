@@ -48,9 +48,11 @@ CREATE TABLE pallets (
 	blocked BOOLEAN DEFAULT (0),
 	produced DATE DEFAULT (CURRENT_DATE),
 	delivered DATE DEFAULT (NULL),
+	customer_name TEXT DEFAULT (NULL),
     
 	PRIMARY KEY (pallet_id),
 	FOREIGN KEY (cookie_name) REFERENCES cookies(cookie_name)
+	FOREIGN KEY (customer_name) REFERENCES customers(customer_name)
 );
 
 CREATE TABLE orders (

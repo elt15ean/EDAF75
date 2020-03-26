@@ -154,13 +154,6 @@ def reset():
                ('Skanekakor AB', 'Perstorp')
         """
     )
-    c.execute(
-        """
-        INSERT
-        INTO   pallets(cookie_name)
-        VALUES ('Berliner')
-        """
-    )
     conn.commit()
     c.close()
     s = {'OK'}
@@ -230,13 +223,12 @@ def get_pallets():
     c = conn.cursor()
     c.execute(
         """
-        SELECT pallet_id
+        SELECT pallet_id, cookie_name, produced, customer_name, blocked
         FROM   pallets
-        """   
+        """
     )
-    s = [{"cookie": cookie_name, "id": pallet_id,"production_date": produced,"customer_name": customer_name, "blocked": blocked}
-         for (pallet_id,cookie_name, produced, customer_name, blocked) in c]
-    c.close()
+    s = [{"id":pallet_id, "cookie":cookie_name,"productionDate":produced,"customer":customer_name,"blocked":blocked}
+        for(pallet_id, cookie_name, produced, customer_name, blocked) in c]
     return json.dumps({"pallets": s}, indent=4)
 
 @post('/pallets/<current_cookie>')
@@ -248,7 +240,10 @@ def post_pallets(current_cookie):
     """
     SELECT cookie_name
     FROM cookies
+    WHERE cookie_name = ?
     """
+    ,
+    [current_cookie]
     ).fetchall()
     print(type(cookieList))
 
@@ -262,8 +257,10 @@ def post_pallets(current_cookie):
         """
         INSERT
         INTO pallets (cookie_name)
-        VALUES ('Berliner')
+        VALUES (?)
         """
+        ,
+        [current_cookie]
         )
         conn.commit()
         s = [{"status": "ok", "id":"123"}]
