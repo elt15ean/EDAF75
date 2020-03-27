@@ -69,7 +69,7 @@ def reset():
     c.execute(
         """
         INSERT
-        INTO   cookies(cookie_name)
+        INTO   cookies(cookie)
         VALUES ('Nut ring'),
                ('Nut cookie'),
                ('Amneris'),
@@ -81,7 +81,7 @@ def reset():
     c.execute(
         """
         INSERT
-        INTO   ingredients(ingredient_name, quantity, unit)
+        INTO   ingredients(ingredient, quantity, unit)
         VALUES ('Flour', 100000, 'g'),
                ('Butter', 100000, 'g'),
                ('Icing sugar', 100000, 'g'),
@@ -106,7 +106,7 @@ def reset():
     c.execute(
         """
         INSERT
-        INTO   recipes(cookie_name, ingredient_name, quantity_needed)
+        INTO   recipes(cookie, ingredient, quantity_needed)
         VALUES ('Nut ring','Flour',450),
                ('Nut ring','Butter',450),
                ('Nut ring','Icing sugar',190),
@@ -143,7 +143,7 @@ def reset():
     c.execute(
         """
         INSERT
-        INTO   customers(customer_name, customer_address)
+        INTO   customers(customer, customer_address)
         VALUES ('Finkakor AB', 'Helsingborg'),
                ('Smabrod AB', 'Malmo'),
                ('Kaffebrod AB', 'Landskrona'),
@@ -165,12 +165,12 @@ def customers():
     c = conn.cursor()
     c.execute(
         """
-        SELECT customer_name, customer_address
+        SELECT customer, customer_address
         FROM   customers
 	ORDER BY customer_name
         """
     )
-    s = [{"customer_name": name, "customer_address": address}
+    s = [{"customer": name, "customer_address": address}
          for (name, address) in c]
     return json.dumps({"customers": s}, indent=4)
 
@@ -179,13 +179,13 @@ def ingredients():
     c = conn.cursor()
     c.execute(
         """
-        SELECT ingredient_name, quantity, unit
+        SELECT ingredient, quantity, unit
         FROM   ingredients
-	ORDER BY ingredient_name
+	ORDER BY ingredient
         """
     )
-    s = [{"ingredient_name": ingredient_name, "quantity": quantity, "unit": unit}
-         for (ingredient_name, quantity, unit) in c]
+    s = [{"ingredient": ingredient_name, "quantity": quantity, "unit": unit}
+         for (ingredient, quantity, unit) in c]
     return json.dumps({"ingredients": s}, indent=4)
 
 @get('/cookies')
@@ -193,13 +193,13 @@ def cookies():
     c = conn.cursor()
     c.execute(
         """
-        SELECT cookie_name
+        SELECT cookie
         FROM   cookies
-	ORDER BY cookie_name
+	ORDER BY cookie
         """
     )
-    s = [{"name": cookie_name}
-         for (cookie_name) in c]
+    s = [{"name": cookie}
+         for (cookie) in c]
     return json.dumps({"cookies": s}, indent=4)
 
 @get('/recipes')
@@ -207,66 +207,61 @@ def recipes():
     c = conn.cursor()
     c.execute(
         """
-        SELECT cookie_name, ingredient_name, quantity_needed, unit
+        SELECT cookie, ingredient, quantity_needed, unit
         FROM   recipes
 	JOIN ingredients
-	USING (ingredient_name)
-	ORDER BY cookie_name, ingredient_name
+	USING (ingredient)
+	ORDER BY cookie, ingredient
         """
     )
-    s = [{"cookie": cookie_name, "ingredient": ingredient_name,"quantity": quantity_needed,"unit": unit}
-         for (cookie_name, ingredient_name, quantity_needed, unit) in c]
+    s = [{"cookie": cookie, "ingredient": ingredient,"quantity": quantity_needed,"unit": unit}
+         for (cookie, ingredient, quantity_needed, unit) in c]
     return json.dumps({"recipes": s}, indent=4)
 
 @get('/pallets')
 def get_pallets():
     response.content_type= 'application/json'
-    cookie_name = request.query.cookie_name
-    blocked = request.query.blocked
-    after = request.query.after
-    before = request.query.before
-    if len(cookie_name) == 0:
-        cookie_name = 'NOT NULL'
-    if len(blocked) == 0:
-        blocked = '0 OR blocked IS 1'
-    if len(after) == 0:
-        after = '1000-01-01'
-    if len(before) == 0:
-        before = '9999-01-01'
-    print(cookie_name)
-    print(blocked)
-    print(after)
-    print(before)
+    query = """
+    SELECT pallet_id, cookie, produced, customer, blocked
+    FROM pallets
+    WHERE 1 = 1
+    """
+    params = []
+    if request.query.cookie_name:
+        query += "AND cookie_name = ?"
+        params.append(request.query.cookie)
+    if request.query.blocked:
+        query += "AND blocked = ?"
+        params.append(request.query.blocked)
+    if request.query.after:
+        query += "AND produced > ?"
+        params.append(request.query.after)
+    if request.query.before:
+        query += "AND produced < ?"
+        params.append(request.query.before)
     c = conn.cursor()
     c.execute(
-        """
-        SELECT pallet_id, cookie_name, produced, customer_name, blocked
-        FROM pallets
-        WHERE (cookie_name IS ?)
-            AND (produced > ?)
-                AND (produced < ?)
-                    AND (blocked IS ?)
-        """
-        ,
-        [cookie_name, after, before, blocked]
+    query,
+    params
     )
-    s = [{"id":pallet_id, "cookie":cookie_name,"productionDate":produced,"customer":customer_name,"blocked":blocked}
-        for(pallet_id, cookie_name, produced, customer_name, blocked) in c]
+    s = [{"id":pallet_id, "cookie":cookie,"productionDate":produced,"customer":customer,"blocked":blocked}
+        for(pallet_id, cookie, produced, customer, blocked) in c]
+    response.status = 200
     return json.dumps({"pallets": s}, indent=4)
 
 @post('/pallets')
 def post_pallets():
     response.content_type= 'application/json'
-    cookie_name = request.query.cookie_name
+    cookie = request.query.cookie
     c = conn.cursor()
     cookieList = c.execute(
     """
-    SELECT cookie_name
+    SELECT cookie
     FROM cookies
-    WHERE cookie_name = ?
+    WHERE cookie = ?
     """
     ,
-    [cookie_name]
+    [cookie]
     ).fetchall()
     print(type(cookieList))
 
@@ -280,19 +275,19 @@ def post_pallets():
             c.execute(
             """
             WITH ingredients_needed AS(
-                SELECT ingredient_name
+                SELECT ingredient
                 FROM recipes
-                WHERE cookie_name = ?
+                WHERE cookie = ?
             )
             UPDATE ingredients
             SET quantity = quantity - (SELECT quantity_needed
             FROM recipes
-            WHERE cookie_name = ?
-                AND ingredients.ingredient_name = recipes.ingredient_name)
-            WHERE ingredient_name IN ingredients_needed
+            WHERE cookie = ?
+                AND ingredients.ingredient = recipes.ingredient)
+            WHERE ingredient IN ingredients_needed
             """
             ,
-            [cookie_name, cookie_name]
+            [cookie, cookie]
             )
         except:
             s = {"status": "not enough ingredients"}
@@ -302,11 +297,11 @@ def post_pallets():
         c.execute(
         """
         INSERT
-        INTO pallets (cookie_name)
+        INTO pallets (cookie)
         VALUES (?)
         """
         ,
-        [cookie_name]
+        [cookie]
         )
         conn.commit()
         s = [{"status": "ok", "id":"123"}]

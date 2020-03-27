@@ -17,44 +17,44 @@ DROP TABLE IF EXISTS customers;
 
 
 CREATE TABLE ingredients (
-	ingredient_name TEXT,
+	ingredient TEXT,
 	quantity DOUBLE,
 	unit TEXT,
 	delivery DATE,
 	last_delivery_amount DOUBLE,
     
-	PRIMARY KEY (ingredient_name)
+	PRIMARY KEY (ingredient)
 	CONSTRAINT
 		ingredient_check CHECK (quantity >= 0) ON CONFLICT ROLLBACK
 );
 
 CREATE TABLE recipes (
-	ingredient_name TEXT,
-	cookie_name TEXT,
+	ingredient TEXT,
+	cookie TEXT,
 	quantity_needed DOUBLE,
     
-	PRIMARY KEY (ingredient_name, cookie_name),
-	FOREIGN KEY (ingredient_name) REFERENCES ingredients(ingredient_name),
-	FOREIGN KEY (cookie_name) REFERENCES cookies(cookie_name)
+	PRIMARY KEY (ingredient, cookie),
+	FOREIGN KEY (ingredient) REFERENCES ingredients(ingredient),
+	FOREIGN KEY (cookie) REFERENCES cookies(cookie)
 );
 
 CREATE TABLE cookies (
-	cookie_name TEXT,
+	cookie TEXT,
     
-	PRIMARY KEY (cookie_name)
+	PRIMARY KEY (cookie)
 );
 
 CREATE TABLE pallets (
 	pallet_id TEXT DEFAULT (lower(hex(randomblob(16)))),
-	cookie_name TEXT,
+	cookie TEXT,
 	blocked BOOLEAN DEFAULT (0),
 	produced DATE DEFAULT (CURRENT_DATE),
 	delivered DATE DEFAULT (NULL),
-	customer_name TEXT DEFAULT (NULL),
+	customer TEXT DEFAULT (NULL),
     
 	PRIMARY KEY (pallet_id),
-	FOREIGN KEY (cookie_name) REFERENCES cookies(cookie_name)
-	FOREIGN KEY (customer_name) REFERENCES customers(customer_name)
+	FOREIGN KEY (cookie) REFERENCES cookies(cookie)
+	FOREIGN KEY (customer) REFERENCES customers(customer)
 );
 
 CREATE TABLE orders (
@@ -62,28 +62,28 @@ CREATE TABLE orders (
 	no_pallets INT,
 	order_status BOOLEAN,
 	ordered DATE,
-	cookie_name TEXT,
-	customer_name TEXT,
+	cookie TEXT,
+	customer TEXT,
     
 	PRIMARY KEY (order_id),
-	FOREIGN KEY (cookie_name) REFERENCES cookies(cookie_name),
-	FOREIGN KEY (customer_name) REFERENCES customers(customer_name)
+	FOREIGN KEY (cookie) REFERENCES cookies(cookie),
+	FOREIGN KEY (customer) REFERENCES customers(customer)
 );
 
 CREATE TABLE cookie_orders (
-	cookie_name TEXT,
+	cookie TEXT,
     	order_id TEXT,
 
-	PRIMARY KEY (cookie_name, order_id),
-	FOREIGN KEY (cookie_name) REFERENCES cookies(cookie_name),
+	PRIMARY KEY (cookie, order_id),
+	FOREIGN KEY (cookie) REFERENCES cookies(cookie),
 	FOREIGN KEY (order_id) REFERENCES orders(order_id)
 );
 
 CREATE TABLE customers (
-	customer_name TEXT,
+	customer TEXT,
 	customer_address TEXT,
     
-	PRIMARY KEY (customer_name)
+	PRIMARY KEY (customer)
 );
 
 
