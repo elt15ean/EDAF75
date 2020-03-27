@@ -24,6 +24,8 @@ CREATE TABLE ingredients (
 	last_delivery_amount DOUBLE,
     
 	PRIMARY KEY (ingredient_name)
+	CONSTRAINT
+		ingredient_check CHECK (quantity >= 0) ON CONFLICT ROLLBACK
 );
 
 CREATE TABLE recipes (
