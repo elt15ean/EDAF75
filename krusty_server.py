@@ -7,25 +7,7 @@ PORT = 8888
 
 conn = sqlite3.connect("krustyDB.sqlite")
 
-#-----------HELP FUNCTIONS----------------
-def url(resource):
-	return "http://{HOST}:{PORT}{resource}"
-
-def format_response(d):
-	return json.dumps(d, indent=4) + "\n"
-
-def hash(msg):
-    import hashlib
-    return hashlib.sha256(msg.encode('utf-8')).hexdigest()
-
 #---------------SOLVING THE ASSINGMENTS-----------------------------
-
-@get('/ping')
-def get_ping():
-
-    s = {"pong"}
-    response.status = 200
-    return s
 
 @post('/reset')
 def reset():
@@ -156,9 +138,8 @@ def reset():
     )
     conn.commit()
     c.close()
-    s = {'OK'}
     response.status = 200
-    return s
+    return json.dumps({"status": "ok"}, indent=4)
 
 @get('/customers')
 def customers():
@@ -167,7 +148,7 @@ def customers():
         """
         SELECT customer, customer_address
         FROM   customers
-	ORDER BY customer_name
+	ORDER BY customer
         """
     )
     s = [{"customer": name, "customer_address": address}
@@ -184,7 +165,7 @@ def ingredients():
 	ORDER BY ingredient
         """
     )
-    s = [{"ingredient": ingredient_name, "quantity": quantity, "unit": unit}
+    s = [{"ingredient": ingredient, "quantity": quantity, "unit": unit}
          for (ingredient, quantity, unit) in c]
     return json.dumps({"ingredients": s}, indent=4)
 
@@ -227,8 +208,8 @@ def get_pallets():
     WHERE 1 = 1
     """
     params = []
-    if request.query.cookie_name:
-        query += "AND cookie_name = ?"
+    if request.query.cookie:
+        query += "AND cookie = ?"
         params.append(request.query.cookie)
     if request.query.blocked:
         query += "AND blocked = ?"
@@ -263,7 +244,6 @@ def post_pallets():
     ,
     [cookie]
     ).fetchall()
-    print(type(cookieList))
 
     if len(cookieList) == 0:
         s = {"status": "no such cookie"}
@@ -304,9 +284,57 @@ def post_pallets():
         [cookie]
         )
         conn.commit()
-        s = [{"status": "ok", "id":"123"}]
+        c.execute(
+        """
+        SELECT pallet_id
+        FROM pallets
+        WHERE rowid = last_insert_rowid()
+        """
+        )
+        id = c.fetchone()[0]
+        s = [{"status": "ok", "id":id}]
         c.close()
         response.status = 200
         return json.dumps({"data": s}, indent=4)
+
+
+@post('/block/<cookie>/<from_date>/<to_date>')
+def block(cookie, from_date, to_date):
+	c = conn.cursor()
+	c.execute(
+	"""
+	UPDATE pallets
+	SET blocked = 1
+	WHERE cookie = ?
+		AND produced >= ?
+			AND produced <= ?
+	"""
+	,
+	[cookie, from_date, to_date]
+	)
+	s = [{"status": "ok"}]
+	c.close()
+	response.status = 200
+	return json.dumps({"status": "ok"}, indent=4)
+
+
+@post('/unblock/<cookie>/<from_date>/<to_date>')
+def unblock(cookie, from_date, to_date):
+	c = conn.cursor()
+	c.execute(
+	"""
+	UPDATE pallets
+	SET blocked = 0
+	WHERE cookie = ?
+		AND produced >= ?
+			AND produced <= ?
+	"""
+	,
+	[cookie, from_date, to_date]
+	)
+	s = [{"status": "ok"}]
+	c.close()
+	response.status = 200
+	return json.dumps({"status": "ok"}, indent=4)
 
 run(host=HOST, port=PORT, reloader=True, debug=True)
