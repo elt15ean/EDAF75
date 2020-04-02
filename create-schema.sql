@@ -59,20 +59,18 @@ CREATE TABLE pallets (
 
 CREATE TABLE orders (
 	order_id TEXT DEFAULT (lower(hex(randomblob(16)))),
-	no_pallets INT,
 	order_status BOOLEAN,
 	ordered DATE,
-	cookie TEXT,
 	customer TEXT,
     
 	PRIMARY KEY (order_id),
-	FOREIGN KEY (cookie) REFERENCES cookies(cookie),
 	FOREIGN KEY (customer) REFERENCES customers(customer)
 );
 
 CREATE TABLE cookie_orders (
 	cookie TEXT,
-    	order_id TEXT,
+	order_id TEXT,
+	nbr_pallets INT,
 
 	PRIMARY KEY (cookie, order_id),
 	FOREIGN KEY (cookie) REFERENCES cookies(cookie),
