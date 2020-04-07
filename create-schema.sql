@@ -17,31 +17,31 @@ DROP TABLE IF EXISTS customers;
 
 
 CREATE TABLE ingredients (
-	ingredient TEXT,
-	quantity DOUBLE,
+	name TEXT,
+	quantity_in_stock DOUBLE,
 	unit TEXT,
 	delivery DATE,
 	last_delivery_amount DOUBLE,
     
-	PRIMARY KEY (ingredient)
+	PRIMARY KEY (name),
 	CONSTRAINT
-		ingredient_check CHECK (quantity >= 0) ON CONFLICT ROLLBACK
+		ingredient_check CHECK (quantity_in_stock >= 0) ON CONFLICT ROLLBACK
 );
 
 CREATE TABLE recipes (
 	ingredient TEXT,
 	cookie TEXT,
-	quantity_needed DOUBLE,
+	quantity DOUBLE,
     
 	PRIMARY KEY (ingredient, cookie),
-	FOREIGN KEY (ingredient) REFERENCES ingredients(ingredient),
-	FOREIGN KEY (cookie) REFERENCES cookies(cookie)
+	FOREIGN KEY (ingredient) REFERENCES ingredients(name),
+	FOREIGN KEY (cookie) REFERENCES cookies(name)
 );
 
 CREATE TABLE cookies (
-	cookie TEXT,
+	name TEXT,
     
-	PRIMARY KEY (cookie)
+	PRIMARY KEY (name)
 );
 
 CREATE TABLE pallets (
@@ -50,21 +50,21 @@ CREATE TABLE pallets (
 	blocked BOOLEAN DEFAULT (0),
 	produced DATE DEFAULT (CURRENT_DATE),
 	delivered DATE DEFAULT (NULL),
-	customer TEXT DEFAULT (NULL),
+	order_id TEXT DEFAULT (NULL),
     
 	PRIMARY KEY (pallet_id),
-	FOREIGN KEY (cookie) REFERENCES cookies(cookie)
-	FOREIGN KEY (customer) REFERENCES customers(customer)
+	FOREIGN KEY (cookie) REFERENCES cookies(name),
+	FOREIGN KEY (order_id) REFERENCES orders(order_id)
 );
 
 CREATE TABLE orders (
 	order_id TEXT DEFAULT (lower(hex(randomblob(16)))),
 	order_status BOOLEAN,
 	ordered DATE,
-	customer TEXT,
+	name TEXT,
     
 	PRIMARY KEY (order_id),
-	FOREIGN KEY (customer) REFERENCES customers(customer)
+	FOREIGN KEY (name) REFERENCES customers(name)
 );
 
 CREATE TABLE cookie_orders (
@@ -73,15 +73,15 @@ CREATE TABLE cookie_orders (
 	nbr_pallets INT,
 
 	PRIMARY KEY (cookie, order_id),
-	FOREIGN KEY (cookie) REFERENCES cookies(cookie),
+	FOREIGN KEY (cookie) REFERENCES cookies(name),
 	FOREIGN KEY (order_id) REFERENCES orders(order_id)
 );
 
 CREATE TABLE customers (
-	customer TEXT,
-	customer_address TEXT,
+	name TEXT,
+	address TEXT,
     
-	PRIMARY KEY (customer)
+	PRIMARY KEY (name)
 );
 
 

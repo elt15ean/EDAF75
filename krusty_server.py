@@ -51,7 +51,7 @@ def reset():
     c.execute(
         """
         INSERT
-        INTO   cookies(cookie)
+        INTO   cookies(name)
         VALUES ('Nut ring'),
                ('Nut cookie'),
                ('Amneris'),
@@ -63,7 +63,7 @@ def reset():
     c.execute(
         """
         INSERT
-        INTO   ingredients(ingredient, quantity, unit)
+        INTO   ingredients(name, quantity_in_stock, unit)
         VALUES ('Flour', 100000, 'g'),
                ('Butter', 100000, 'g'),
                ('Icing sugar', 100000, 'g'),
@@ -88,7 +88,7 @@ def reset():
     c.execute(
         """
         INSERT
-        INTO   recipes(cookie, ingredient, quantity_needed)
+        INTO   recipes(cookie, ingredient, quantity)
         VALUES ('Nut ring','Flour',450),
                ('Nut ring','Butter',450),
                ('Nut ring','Icing sugar',190),
@@ -125,7 +125,7 @@ def reset():
     c.execute(
         """
         INSERT
-        INTO   customers(customer, customer_address)
+        INTO   customers(name, address)
         VALUES ('Finkakor AB', 'Helsingborg'),
                ('Smabrod AB', 'Malmo'),
                ('Kaffebrod AB', 'Landskrona'),
@@ -146,12 +146,12 @@ def customers():
     c = conn.cursor()
     c.execute(
         """
-        SELECT customer, customer_address
+        SELECT name, address
         FROM   customers
-	ORDER BY customer
+	ORDER BY name
         """
     )
-    s = [{"customer": name, "customer_address": address}
+    s = [{"name": name, "address": address}
          for (name, address) in c]
     return json.dumps({"customers": s}, indent=4)
 
@@ -160,12 +160,12 @@ def ingredients():
     c = conn.cursor()
     c.execute(
         """
-        SELECT ingredient, quantity, unit
+        SELECT name, quantity_in_stock, unit
         FROM   ingredients
-	ORDER BY ingredient
+	ORDER BY name
         """
     )
-    s = [{"ingredient": ingredient, "quantity": quantity, "unit": unit}
+    s = [{"name": name, "quantity": quantity_in_stock, "unit": unit}
          for (ingredient, quantity, unit) in c]
     return json.dumps({"ingredients": s}, indent=4)
 
@@ -174,37 +174,39 @@ def cookies():
     c = conn.cursor()
     c.execute(
         """
-        SELECT cookie
+        SELECT name
         FROM   cookies
-	ORDER BY cookie
+	ORDER BY name
         """
     )
-    s = [{"name": cookie}
-         for (cookie) in c]
-    return json.dumps({"cookies": s}, indent=4)
+    s = [{"name": name}
+         for (name) in c]
+    return json.dumps({"name": s}, indent=4)
 
 @get('/recipes')
 def recipes():
     c = conn.cursor()
     c.execute(
         """
-        SELECT cookie, ingredient, quantity_needed, unit
+        SELECT cookie, recipes.ingredient, quantity, unit
         FROM   recipes
 	JOIN ingredients
-	USING (ingredient)
-	ORDER BY cookie, ingredient
+	ON ingredients.name = recipes.ingredient
+	ORDER BY cookie, recipes.ingredient
         """
     )
-    s = [{"cookie": cookie, "ingredient": ingredient,"quantity": quantity_needed,"unit": unit}
-         for (cookie, ingredient, quantity_needed, unit) in c]
+    s = [{"cookie": cookie, "ingredient": recipes.ingredient,"quantity": quantity,"unit": unit}
+         for (cookie, recipes.ingredient, quantity, unit) in c]
     return json.dumps({"recipes": s}, indent=4)
 
 @get('/pallets')
 def get_pallets():
     response.content_type= 'application/json'
     query = """
-    SELECT pallet_id, cookie, produced, customer, blocked
+    SELECT pallet_id, cookie, produced, name, blocked
     FROM pallets
+    JOIN orders
+    USING (order_id)
     WHERE 1 = 1
     """
     params = []
@@ -225,8 +227,8 @@ def get_pallets():
     query,
     params
     )
-    s = [{"id":pallet_id, "cookie":cookie,"productionDate":produced,"customer":customer,"blocked":blocked}
-        for(pallet_id, cookie, produced, customer, blocked) in c]
+    s = [{"id":pallet_id, "cookie":cookie,"productionDate":produced,"customer":name,"blocked":blocked}
+        for(pallet_id, cookie, produced, name, blocked) in c]
     response.status = 200
     return json.dumps({"pallets": s}, indent=4)
 
@@ -237,9 +239,9 @@ def post_pallets():
     c = conn.cursor()
     cookieList = c.execute(
     """
-    SELECT cookie
+    SELECT name
     FROM cookies
-    WHERE cookie = ?
+    WHERE name = ?
     """
     ,
     [cookie]
@@ -260,11 +262,11 @@ def post_pallets():
                 WHERE cookie = ?
             )
             UPDATE ingredients
-            SET quantity = quantity - (SELECT quantity_needed
+            SET quantity_in_stock = quantity_in_stock - (SELECT quantity
             FROM recipes
             WHERE cookie = ?
-                AND ingredients.ingredient = recipes.ingredient)
-            WHERE ingredient IN ingredients_needed
+                AND ingredients.name = recipes.ingredient)
+            WHERE recipes.ingredient IN ingredients_needed
             """
             ,
             [cookie, cookie]
@@ -322,7 +324,7 @@ def block(cookie, from_date, to_date):
 def unblock(cookie, from_date, to_date):
 	c = conn.cursor()
 	c.execute(
-	"""
+	"""s
 	UPDATE pallets
 	SET blocked = 0
 	WHERE cookie = ?
