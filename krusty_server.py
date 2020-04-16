@@ -152,7 +152,7 @@ def customers():
         """
     )
     s = [{"name": name, "address": address}
-         for (name, address) in c]
+         for (name, address,) in c]
     return json.dumps({"customers": s}, indent=4)
 
 @get('/ingredients')
@@ -166,22 +166,23 @@ def ingredients():
         """
     )
     s = [{"name": name, "quantity": quantity_in_stock, "unit": unit}
-         for (ingredient, quantity, unit) in c]
+         for (name, quantity_in_stock, unit,) in c]
     return json.dumps({"ingredients": s}, indent=4)
 
 @get('/cookies')
 def cookies():
     c = conn.cursor()
-    c.execute(
+    lista = c.execute(
         """
         SELECT name
         FROM   cookies
 	ORDER BY name
         """
     )
+
     s = [{"name": name}
-         for (name) in c]
-    return json.dumps({"name": s}, indent=4)
+         for (name,) in c]
+    return json.dumps({"cookies": s}, indent=4)
 
 @get('/recipes')
 def recipes():
@@ -196,7 +197,7 @@ def recipes():
         """
     )
     s = [{"cookie": cookie, "ingredient": recipes.ingredient,"quantity": quantity,"unit": unit}
-         for (cookie, recipes.ingredient, quantity, unit) in c]
+         for (cookie, recipes.ingredient, quantity, unit,) in c]
     return json.dumps({"recipes": s}, indent=4)
 
 @get('/pallets')
@@ -228,7 +229,7 @@ def get_pallets():
     params
     )
     s = [{"id":pallet_id, "cookie":cookie,"productionDate":produced,"customer":name,"blocked":blocked}
-        for(pallet_id, cookie, produced, name, blocked) in c]
+        for(pallet_id, cookie, produced, name, blocked,) in c]
     response.status = 200
     return json.dumps({"pallets": s}, indent=4)
 
@@ -251,7 +252,7 @@ def post_pallets():
         s = {"status": "no such cookie"}
         c.close()
         response.status = 400
-        return json.dumps({"data": s}, indent=4)
+        return json.dumps(s, indent=4)
     else:
         try:
             c.execute(
@@ -262,11 +263,11 @@ def post_pallets():
                 WHERE cookie = ?
             )
             UPDATE ingredients
-            SET quantity_in_stock = quantity_in_stock - (SELECT quantity
-            FROM recipes
-            WHERE cookie = ?
+            SET quantity_in_stock = quantity_in_stock - 54*(SELECT quantity
+                FROM recipes
+                WHERE cookie = ?
                 AND ingredients.name = recipes.ingredient)
-            WHERE recipes.ingredient IN ingredients_needed
+            WHERE name IN ingredients_needed
             """
             ,
             [cookie, cookie]
@@ -275,7 +276,7 @@ def post_pallets():
             s = {"status": "not enough ingredients"}
             c.close()
             response.status = 400
-            return json.dumps({"data": s}, indent=4)
+            return json.dumps(s, indent=4)
         c.execute(
         """
         INSERT
@@ -294,10 +295,10 @@ def post_pallets():
         """
         )
         id = c.fetchone()[0]
-        s = [{"status": "ok", "id":id}]
+        s = {"status": "ok", "id": id}
         c.close()
         response.status = 200
-        return json.dumps({"data": s}, indent=4)
+        return json.dumps(s, indent=4)
 
 
 @post('/block/<cookie>/<from_date>/<to_date>')
