@@ -17,13 +17,13 @@ The model is in the file [`UML.png`](UML.png):
 
 ## Relations
 
-+ ingredients(**ingredient**, quantity, unit, delivery, last_ delivery_amount)
-+ recipes(**_ingredient_**, **_cookie_**, quantity_needed)
-+ cookies(**cookie**)
-+ pallets(**pallet_id**, _cookie_,  _customer_, blocked, produced, delivered)
-+ orders(**order_id**, _cookie_, _customer_, no_ pallets, order_status, ordered)
-+ cookie_orders(**_order_id_**, **_cookie_**)
-+ customers(**customer**, customer_ adress)
++ ingredients(**name**, quantity_ in_stock, unit, delivery, last_ delivery_amount)
++ recipes(**_ingredient_**, **_cookie_**, quantity)
++ cookies(**name**)
++ pallets(**pallet_id**, _order_id_, _cookie_, blocked, produced, delivered)
++ orders(**order_id**, _name_, order_status, ordered)
++ cookie_orders(**_order_id_**, **_cookie_**, nbr_pallets)
++ customers(**name**, adress)
 
 ## Scripts
 
