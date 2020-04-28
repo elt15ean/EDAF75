@@ -206,7 +206,7 @@ def get_pallets():
     query = """
     SELECT pallet_id, cookie, produced, name, blocked
     FROM pallets
-    JOIN orders
+    LEFT JOIN orders
     USING (order_id)
     WHERE 1 = 1
     """
@@ -325,7 +325,7 @@ def block(cookie, from_date, to_date):
 def unblock(cookie, from_date, to_date):
 	c = conn.cursor()
 	c.execute(
-	"""s
+	"""
 	UPDATE pallets
 	SET blocked = 0
 	WHERE cookie = ?
